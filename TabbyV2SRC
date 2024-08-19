@@ -668,58 +668,83 @@ end
 
 Farm:AddToggle({
     Name = "Auto Sell",
-    Default = false,
-    Callback = function(Value)
-        shared.autoSell = Value
-        if shared.autoSell then
-            spawn(function()
-                while shared.autoSell do
-                    local player = game.Players.LocalPlayer
-                    local capacity = player.CoreStats.Capacity.Value
-                    local pollen = player.CoreStats.Pollen.Value
+Default = false,
+Callback = function(Value)
+    shared.autoSell = Value
+    if shared.autoSell then
+        spawn(function()
+            while shared.autoSell do
+                local player = game.Players.LocalPlayer
+                local capacity = player.CoreStats.Capacity.Value
+                local initialPollen = player.CoreStats.Pollen.Value
+                local initialHoney = player.CoreStats.Honey.Value
+                local pollenThreshold = capacity * 0.99
 
-                    if pollen >= capacity * 0.99 then
-                        local originalPosition = player.Character.HumanoidRootPart.CFrame
-                        local wasAutoFarming = shared.a11 or shared.a12 or shared.a13
-                        local hiveNumber = tostring(player.Honeycomb.Value)
+                if initialPollen >= pollenThreshold then
+                    local originalPosition = player.Character.HumanoidRootPart.CFrame
+                    local wasAutoFarming = shared.a11 or shared.a12 or shared.a13
+                    local hiveNumber = tostring(player.Honeycomb.Value)
 
-                        shared.a11, shared.a12, shared.a13 = false, false, false
+                    shared.a11, shared.a12, shared.a13 = false, false, false
 
-                        for i = 1, 5 do
-                            player.Character.HumanoidRootPart.CFrame = workspace.Honeycombs[hiveNumber].LightHolder.CFrame * CFrame.new(0, 5, -5)
-                            task.wait(0.1)
+                    for i = 1, 5 do
+                        player.Character.HumanoidRootPart.CFrame = workspace.Honeycombs[hiveNumber].LightHolder.CFrame * CFrame.new(0, 5, -5)
+                        task.wait(0.1)
+                    end
+
+                    -- Start making honey if the button says "Make Honey"
+                    repeat
+                        local buttonText = player.PlayerGui.ScreenGui.ActivateButton.TextBox.Text
+                        if buttonText == 'Make Honey' then
+                            game.ReplicatedStorage.Events.PlayerHiveCommand:FireServer("ToggleHoneyMaking")
+                            print("Pressing Make Honey Button")
+                            task.wait(1) -- Delay to avoid multiple presses
+                        end
+                        task.wait(0.5)
+                    until player.CoreStats.Pollen.Value == 0 or not shared.autoSell
+
+                    -- Wait until honey has increased by at least the initial pollen amount
+                    local honeyIncreased = false
+                    local conversionStartTime = tick()
+
+                    repeat
+                        task.wait(1) -- Wait before checking again
+                        local currentHoney = player.CoreStats.Honey.Value
+                        local currentPollen = player.CoreStats.Pollen.Value
+
+                        if currentHoney >= initialHoney + initialPollen then
+                            honeyIncreased = true
                         end
 
-                        repeat
-                            local buttonText = player.PlayerGui.ScreenGui.ActivateButton.TextBox.Text
-                            if buttonText == 'Make Honey' then
-                                game.ReplicatedStorage.Events.PlayerHiveCommand:FireServer("ToggleHoneyMaking")
-                            end
-                            task.wait()
-                        until player.CoreStats.Pollen.Value == 0 or not shared.autoSell
+                        -- Optional: Limit maximum waiting time to avoid infinite loop
+                        if tick() - conversionStartTime > 60 then
+                            print("Timeout waiting for honey increase")
+                            honeyIncreased = true -- Exit loop after timeout
+                        end
+                    until honeyIncreased or not shared.autoSell
 
-                        if shared.autoSell then
-                            if wasAutoFarming then
-                                if selectedFarm == "Tween" then
-                                    shared.a11 = true
-                                    startTweenFarm()
-                                elseif selectedFarm == "TweenFast" then
-                                    shared.a12 = true
-                                    startTweenFastFarm()
-                                elseif selectedFarm == "Walk" then
-                                    shared.a13 = true
-                                    startWalkFarm()
-                                end
-                            else
-                                player.Character.HumanoidRootPart.CFrame = originalPosition
+                    if shared.autoSell then
+                        if wasAutoFarming then
+                            if selectedFarm == "Tween" then
+                                shared.a11 = true
+                                startTweenFarm()
+                            elseif selectedFarm == "TweenFast" then
+                                shared.a12 = true
+                                startTweenFastFarm()
+                            elseif selectedFarm == "Walk" then
+                                shared.a13 = true
+                                startWalkFarm()
                             end
+                        else
+                            player.Character.HumanoidRootPart.CFrame = originalPosition
                         end
                     end
-                    task.wait(8)
                 end
-            end)
-        end
-    end    
+                task.wait(8)
+            end
+        end)
+    end
+end
 })
 
 
