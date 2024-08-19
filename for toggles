@@ -1,8 +1,24 @@
 AutoFarmSection:toggle({
-    name = "Example Toggle",
-    def = false, -- default state
-    callback = function(value)
-        -- This function is called when the toggle is changed
-        togglestore.ExampleToggle = value
-    end
+      Name = "Kill Viciuos Bee",
+    Default = false,
+    Callback = function(cointr)
+         getgenv().turnoff4 = cointr
+         if turnoff4 == true then
+         while turnoff4 == true do
+             wait()
+			local vichumanoid = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart
+			for i,v in next, game.workspace.Particles:GetChildren() do
+				for x in string.gmatch(v.Name, "Vicious") do
+                    task.wait() if string.find(v.Name, "Vicious") then 
+                        game.Players.LocalPlayer.Character.Humanoid.HipHeight = 20 for i=1, 4 do vichumanoid.CFrame = CFrame.new(v.Position.x, v.Position.y + 20, v.Position.z) task.wait(.3) 
+                        end 
+                    end end
+                end
+			end
+			task.wait(.1)
+         
+         else
+             game.Players.LocalPlayer.Character.Humanoid.HipHeight = 3
+         end 
+end})
 })
