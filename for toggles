@@ -1,0 +1,8 @@
+AutoFarmSection:toggle({
+    name = "Example Toggle",
+    def = false, -- default state
+    callback = function(value)
+        -- This function is called when the toggle is changed
+        togglestore.ExampleToggle = value
+    end
+})
