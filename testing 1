@@ -696,84 +696,237 @@ end
 
 
 Farm:AddToggle({
-    Name = "Auto Sell",
-Default = false,
-Callback = function(Value)
-    shared.autoSell = Value
-    if shared.autoSell then
-        spawn(function()
-            while shared.autoSell do
-                local player = game.Players.LocalPlayer
-                local capacity = player.CoreStats.Capacity.Value
-                local initialPollen = player.CoreStats.Pollen.Value
-                local initialHoney = player.CoreStats.Honey.Value
-                local pollenThreshold = capacity * 0.99
-
-                if initialPollen >= pollenThreshold then
-                    local originalPosition = player.Character.HumanoidRootPart.CFrame
-                    local wasAutoFarming = shared.a11 or shared.a12 or shared.a13
-                    local hiveNumber = tostring(player.Honeycomb.Value)
-
-                    shared.a11, shared.a12, shared.a13 = false, false, false
-
-                    for i = 1, 5 do
-                        player.Character.HumanoidRootPart.CFrame = workspace.Honeycombs[hiveNumber].LightHolder.CFrame * CFrame.new(0, 5, -5)
-                        task.wait(0.1)
-                    end
-
-                    -- Start making honey if the button says "Make Honey"
-                    repeat
-                        local buttonText = player.PlayerGui.ScreenGui.ActivateButton.TextBox.Text
-                        if buttonText == 'Make Honey' then
-                            game.ReplicatedStorage.Events.PlayerHiveCommand:FireServer("ToggleHoneyMaking")
-                            print("Pressing Make Honey Button")
-                            task.wait(1) -- Delay to avoid multiple presses
-                        end
-                        task.wait(0.5)
-                    until player.CoreStats.Pollen.Value == 0 or not shared.autoSell
-
-                    -- Wait until honey has increased by at least the initial pollen amount
-                    local honeyIncreased = false
-                    local conversionStartTime = tick()
-
-                    repeat
-                        task.wait(1) -- Wait before checking again
-                        local currentHoney = player.CoreStats.Honey.Value
-                        local currentPollen = player.CoreStats.Pollen.Value
-
-                        if currentHoney >= initialHoney + initialPollen then
-                            honeyIncreased = true
-                        end
-
-                        -- Optional: Limit maximum waiting time to avoid infinite loop
-                        if tick() - conversionStartTime > 60 then
-                            print("Timeout waiting for honey increase")
-                            honeyIncreased = true -- Exit loop after timeout
-                        end
-                    until honeyIncreased or not shared.autoSell
-
-                    if shared.autoSell then
-                        if wasAutoFarming then
-                            if selectedFarm == "Tween" then
-                                shared.a11 = true
-                                startTweenFarm()
-                            elseif selectedFarm == "TweenFast" then
-                                shared.a12 = true
-                                startTweenFastFarm()
-                            elseif selectedFarm == "Walk" then
-                                shared.a13 = true
-                                startWalkFarm()
-                            end
-                        else
-                            player.Character.HumanoidRootPart.CFrame = originalPosition
-                        end
-                    end
-                end
-                task.wait(8)
+    Title = "Auto Convert",
+    Default = false,
+  }):OnChanged(function()
+    -- line: [0, 0] id: 58
+    _G.Mytoggle1 = r10_0.MyToggle1.Value
+    if _G.Mytoggle1 then
+      while true do
+        if _G.Mytoggle1 then
+          pcall(function()
+            -- line: [0, 0] id: 59
+            local r0_59 = game.Players.LocalPlayer.Character
+            if not r0_59 then
+              return 
             end
-        end)
+            local r1_59 = game.Players.LocalPlayer
+            local r3_59 = nil
+            for r7_59, r8_59 in pairs(workspace.Honeycombs:GetDescendants()) do
+              if r8_59:IsA("ObjectValue") and r8_59.Name == "Owner" and r8_59.Value == r1_59 then
+                for r13_59, r14_59 in pairs(r8_59.Parent:GetDescendants()) do
+                  if r14_59.Name == "StickerCanvas" then
+                    r3_59 = r14_59.Value
+                  end
+                end
+              end
+            end
+            local r4_59 = 2.5
+            local function r5_59(r0_60, r1_60, r2_60)
+              -- line: [0, 0] id: 60
+              local r3_60 = r1_60.Position
+              local r4_60 = r1_60.Size
+              if r3_60 and r4_60 then
+                local r5_60 = Vector3.new(r4_60.X + r2_60, r4_60.Y, r4_60.Z + r2_60)
+                local r6_60 = r3_60 - r5_60 / 2
+                local r7_60 = r3_60 + r5_60 / 2
+                local r8_60 = r0_60.X
+                if r6_60.X > r8_60 then
+                  goto label_39
+                else
+                  r8_60 = r0_60.X
+                  if r8_60 > r7_60.X then
+                    goto label_39
+                  else
+                    r8_60 = r0_60.Z
+                    if r6_60.Z > r8_60 then
+                      goto label_39
+                    else
+                      r8_60 = r0_60.Z
+                      if r8_60 <= r7_60.Z then
+                        r8_60 = true
+                      else
+                        ::label_39::
+                        ::label_39::
+                        r8_60 = false
+                      end
+                    end
+                  end
+                end
+                return r8_60
+              end
+              return false
+            end
+            local r7_59, r8_59 = game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.MeterHUD.PollenMeter.Bar.TextLabel.Text:match("([^/]+)/([^/]+)")
+            local function r9_59(r0_61)
+              -- line: [0, 0] id: 61
+              return r0_61:gsub(",", "")
+            end
+            local r10_59 = r9_59(r7_59)
+            local r11_59 = r9_59(r8_59)
+            local r12_59 = tonumber(r10_59)
+            local r13_59 = tonumber(r11_59)
+            if r12_59 and r13_59 and r13_59 * r27_0 / 100 <= r12_59 or r30_0 then
+              r18_0 = false
+              r19_0 = false
+              r20_0 = false
+              r21_0 = false
+              r22_0 = false
+              r17_0 = false
+              if r28_0 == "Reset" then
+                game.Players.LocalPlayer.Character.Humanoid.Health = 0
+                while true do
+                  wait(0.2)
+                  if game.Players.LocalPlayer.Character then
+                    local r14_59 = game.Players.LocalPlayer.Character.Humanoid.Health
+                    if r14_59 > 0 then
+                      break
+                    end
+                  else
+                    local r14_59 = _G.Mytoggle1
+                    if not r14_59 then
+                      break
+                    end
+                  end
+                end
+                wait(0.5)
+                while true do
+                  game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("PlayerHiveCommand"):FireServer("ToggleHoneyMaking")
+                  wait(0.5)
+                  make_honey = game.Players.LocalPlayer.PlayerGui.ScreenGui.ActivateButton.TextBox.Text
+                  if make_honey == "Make Honey" then
+                    local r14_59 = _G.Mytoggle1
+                    if not r14_59 then
+                      break
+                    end
+                  else
+                    break
+                  end
+                end
+                while true do
+                  r7_59, r8_59 = game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.MeterHUD.PollenMeter.Bar.TextLabel.Text:match("([^/]+)/([^/]+)")
+                  r12_59 = tonumber(r9_59(r7_59))
+                  wait(0.2)
+                  if r12_59 == 0 then
+                    local r14_59 = r30_0
+                    if r14_59 then
+                      ::label_198::
+                      r14_59 = _G.Mytoggle1
+                      if not r14_59 then
+                        break
+                      end
+                    else
+                      break
+                    end
+                  else
+                    goto label_198	-- block#28 is visited secondly
+                  end
+                end
+                wait(6.5)
+                r18_0 = true
+                r19_0 = true
+                r20_0 = true
+                r21_0 = true
+                r22_0 = true
+                r17_0 = true
+              elseif r28_0 == "Walk" or r28_0 == "Tween - Risk" then
+                r18_0 = false
+                r19_0 = false
+                r20_0 = false
+                r21_0 = false
+                r22_0 = false
+                r17_0 = false
+                local r14_59 = workspace.HiveDeco.StickerCanvases[r3_59.Name].PlaceableSurfaces.NegateCircle
+                repeat
+                  wait(0.2)
+                  if not r5_59(r0_59.PrimaryPart.Position, r14_59, r4_59) then
+                    local r15_59 = r0_59:FindFirstChildOfClass("Humanoid")
+                    if r15_59 then
+                      if r28_0 == "Walk" then
+                        r15_59:MoveTo(r14_59.Position)
+                        local r16_59 = r0_59:FindFirstChildOfClass("Humanoid")
+                        local r17_59 = r0_59:FindFirstChild("HumanoidRootPart")
+                        if r16_59 and r17_59 and workspace:FindPartOnRay(Ray.new(r17_59.Position, r17_59.CFrame.LookVector * 8), r0_59) and r16_59:GetState() ~= Enum.HumanoidStateType.Jumping then
+                          r16_59:ChangeState(Enum.HumanoidStateType.Jumping)
+                        end
+                      else
+                        local r17_59 = game:GetService("TweenService"):Create(r0_59.HumanoidRootPart, TweenInfo.new(((r14_59.Position - r0_59.HumanoidRootPart.Position)).magnitude / r31_0, Enum.EasingStyle.Linear), {
+                          CFrame = r14_59.CFrame,
+                        })
+                        local r18_59 = Instance.new("BodyVelocity", r0_59.HumanoidRootPart)
+                        local r19_59 = Vector3.new(0, 0, 0)
+                        r18_59.maxForce = Vector3.new(9000000000, 9000000000, 9000000000)
+                        r18_59.velocity = r19_59
+                        r18_59.Name = "Main"
+                        r17_59:Play()
+                        r17_59.Completed:Wait()
+                        r18_59:Destroy()
+                      end
+                    end
+                  end
+                  local r15_59 = r5_59(r0_59.PrimaryPart.Position, r14_59, r4_59)
+                  if r15_59 then
+                    break
+                  end
+                  r15_59 = _G.Mytoggle1
+                until not r15_59
+                wait(0.5)
+                repeat
+                  game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("PlayerHiveCommand"):FireServer("ToggleHoneyMaking")
+                  wait(0.5)
+                  make_honey = game.Players.LocalPlayer.PlayerGui.ScreenGui.ActivateButton.TextBox.Text
+                  if make_honey ~= "Make Honey" then
+                    break
+                  end
+                  local r15_59 = _G.Mytoggle1
+                until not r15_59
+                while true do
+                  r7_59, r8_59 = game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.MeterHUD.PollenMeter.Bar.TextLabel.Text:match("([^/]+)/([^/]+)")
+                  r12_59 = tonumber(r9_59(r7_59))
+                  wait(0.2)
+                  if r12_59 == 0 then
+                    local r15_59 = r30_0
+                    if r15_59 then
+                      ::label_439::
+                      r15_59 = _G.Mytoggle1
+                      if not r15_59 then
+                        break
+                      end
+                    else
+                      break
+                    end
+                  else
+                    goto label_439	-- block#54 is visited secondly
+                  end
+                end
+                wait(6.5)
+                r18_0 = true
+                r19_0 = true
+                r20_0 = true
+                r21_0 = true
+                r22_0 = true
+                r17_0 = true
+              end
+            else
+              r18_0 = true
+              r19_0 = true
+              r22_0 = true
+              r17_0 = true
+            end
+          end)
+          wait(0.2)
+        end
+      end
+      r18_0 = true
+      r19_0 = true
+      r20_0 = true
+      r21_0 = true
+      r22_0 = true
+      r17_0 = true
+    else
+      goto label_30	-- block#3 is visited secondly
     end
-end
+  end
 })
 
 
