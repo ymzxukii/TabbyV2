@@ -286,7 +286,7 @@ local function findNearestBalloon(currentPosition)
     local shortestDistance = math.huge
     local balloonPosition = nil
 
-    for _, balloon in pairs(workspace.Balloons.FieldBalloons:GetChildren()) do
+    for , balloon in pairs(workspace.Balloons.FieldBalloons:GetChildren()) do
         local balloonBody = balloon:FindFirstChild("BalloonBody")
         if balloonBody then
             local distance = (balloonBody.Position - currentPosition).Magnitude
@@ -299,6 +299,35 @@ local function findNearestBalloon(currentPosition)
     end
 
     return nearestBalloon, balloonPosition
+end
+
+local function isBalloonInField(balloonBody)
+    for , fieldPosition in pairs(fieldPositions) do
+        local distanceToField = (balloonBody.Position - fieldPosition.Position).Magnitude
+        if distanceToField < 40 then
+            return true
+        end
+    end
+    return false
+end
+
+local function moveToBalloon(nearestBalloon)
+    while nearestBalloon and isBalloonInField(nearestBalloon) do
+        object:MoveTo(nearestBalloon.Position)
+        wait(0.1)
+        if not isBalloonInField(nearestBalloon) then
+            break
+        end
+    end
+end
+
+local function trackAndMoveToNearestBalloon(currentPosition)
+    local nearestBalloon, balloonPosition = findNearestBalloon(currentPosition)
+    if nearestBalloon then
+        coroutine.wrap(function()
+            moveToBalloon(nearestBalloon)
+        end)()
+    end
 end
 
 function startTweenFarm()
