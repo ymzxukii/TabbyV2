@@ -302,7 +302,7 @@ local function findNearestBalloon(currentPosition)
 end
 
 local function isBalloonInField(balloonBody)
-    for , fieldPosition in pairs(fieldPositions) do
+    for fieldPosition in pairs(fieldPositions) do
         local distanceToField = (balloonBody.Position - fieldPosition.Position).Magnitude
         if distanceToField < 40 then
             return true
