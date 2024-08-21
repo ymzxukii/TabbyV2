@@ -286,7 +286,7 @@ local function findNearestBalloon(currentPosition)
     local shortestDistance = math.huge
     local balloonPosition = nil
 
-    for , balloon in pairs(workspace.Balloons.FieldBalloons:GetChildren()) do
+    for balloon in pairs(workspace.Balloons.FieldBalloons:GetChildren()) do
         local balloonBody = balloon:FindFirstChild("BalloonBody")
         if balloonBody then
             local distance = (balloonBody.Position - currentPosition).Magnitude
